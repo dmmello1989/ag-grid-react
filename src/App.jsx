@@ -9,6 +9,7 @@ class App extends Component {
     super(props);
 
     this.state = {
+      modelVisibility: true,
       columnDefs: [
         {
           headerName: "Make",
@@ -40,6 +41,28 @@ class App extends Component {
       .then((rowData) => this.setState({ rowData }));
   }
 
+  componentDidUpdate() {
+    this.columnApi.setColumnVisible("model", this.state.modelVisibility);
+  }
+
+  onGridReady = (params) => {
+    this.gridApi = params.api;
+    this.columnApi = params.columnApi;
+  };
+
+  toggleModelColumn = () => {
+    this.setState({ modelVisibility: !this.state.modelVisibility });
+  };
+
+  onButtonClick = () => {
+    const selectedNodes = this.gridApi.getSelectedNodes();
+    const selectedData = selectedNodes.map((node) => node.data);
+    const selectedDataString = selectedData
+      .map((node) => `${node.make} ${node.model}`)
+      .join(", ");
+    alert(`Selected Nodes: ${selectedDataString}`);
+  };
+
   render() {
     return (
       <div
@@ -49,10 +72,17 @@ class App extends Component {
           width: "600px",
         }}
       >
+        <button type="button" onClick={this.onButtonClick}>
+          Selected Rows
+        </button>
+        <button type="button" onClick={this.toggleModelColumn}>
+          Toggle Model Column
+        </button>
         <AgGridReact
           rowSelection="multiple"
-          columnDefs={this.state.columnDefs}
           rowData={this.state.rowData}
+          onGridReady={this.onGridReady}
+          columnDefs={this.state.columnDefs}
         ></AgGridReact>
       </div>
     );
